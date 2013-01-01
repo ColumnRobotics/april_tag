@@ -64,7 +64,8 @@ class AprilTagNode
   double tag_size; // tag side length of frame in meters 
   bool  show_debug_image;
 
-  geometry_msgs::Pose april_pose;
+  //geometry_msgs::Pose april_pose;
+  geometry_msgs::PoseStamped april_pose;
 
 public:
   AprilTagNode() : 
@@ -82,7 +83,8 @@ public:
     image_sub_ = it_.subscribe("/camera/image_raw", 1, &AprilTagNode::imageCb, this);
     image_pub_ = it_.advertise("/april_tag_debug/output_video", 1);
     tag_list_pub = nh_.advertise<april_tag::AprilTagList>("/april_tags", 100);
-    april_pose_pub = nh_.advertise<geometry_msgs::Pose>("/april_pose",50);
+    //april_pose_pub = nh_.advertise<geometry_msgs::Pose>("/april_pose",50);
+    april_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("/april_pose",50);
 
     // Use a private node handle so that multiple instances of the node can
     // be run simultaneously while using different parameters.
@@ -142,7 +144,8 @@ public:
 
 
     april_tag::AprilTag tag_msg;
-    geometry_msgs::Pose april_pose;
+    //geometry_msgs::Pose april_pose;
+    geometry_msgs::PoseStamped april_pose;
 
     tag_msg.id = detection.id;
     tag_msg.hamming_distance = detection.hammingDistance;
@@ -154,12 +157,21 @@ public:
     tag_msg.pitch = pitch;
     tag_msg.roll = roll;
 
-    april_pose.position.x = tag_msg.x;
+    /*april_pose.position.x = tag_msg.x;
     april_pose.position.y = tag_msg.y;
     april_pose.position.z = tag_msg.z;
     april_pose.orientation.x = tag_msg.yaw;
     april_pose.orientation.y = tag_msg.pitch;
     april_pose.orientation.z = tag_msg.roll;
+    april_pose_pub.publish(april_pose);*/
+
+    april_pose.pose.position.x = tag_msg.x;
+    april_pose.pose.position.y = tag_msg.y;
+    april_pose.pose.position.z = tag_msg.z;
+    april_pose.pose.orientation.x = tag_msg.yaw;
+    april_pose.pose.orientation.y = tag_msg.pitch;
+    april_pose.pose.orientation.z = tag_msg.roll;
+    april_pose.header.stamp = ros::Time::now();
     april_pose_pub.publish(april_pose);
 
     return tag_msg;

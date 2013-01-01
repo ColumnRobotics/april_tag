@@ -102,22 +102,15 @@ file(GLOB SOURCE_FILES "src/apriltags/*.cc")
 
 ## Declare a cpp executable
 
-<<<<<<< HEAD
 add_executable(cole_node src/cole_node.cpp ${SOURCE_FILES})
-=======
-add_executable(april_tag_node src/april_tag_node.cpp ${SOURCE_FILES})
->>>>>>> 2c9fc2ac264ba0d442a6d649bb8e91350e55803f
+#add_executable(april_tag_node src/april_tag_node.cpp ${SOURCE_FILES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(april_tag_node april_tag_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-<<<<<<< HEAD
 target_link_libraries(cole_node
-=======
-target_link_libraries(april_tag_node
->>>>>>> 2c9fc2ac264ba0d442a6d649bb8e91350e55803f
   ${catkin_LIBRARIES}
 )
 
