@@ -9,6 +9,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "AprilTags/TagDetector.h"
 #include "AprilTags/Tag36h11.h"
+#include "AprilTags/Tag25h9.h"
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseArray.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include "april_tag/AprilTag.h" // rosmsg
 #include "april_tag/AprilTagList.h" // rosmsg
@@ -51,6 +55,7 @@ class AprilTagNode
   image_transport::Publisher image_pub_;
   ros::Publisher tag_list_pub;
   AprilTags::TagDetector* tag_detector;
+  ros::Publisher april_pose_pub;
 
   // allow configurations for these:  
   AprilTags::TagCodes tag_codes;
@@ -59,20 +64,24 @@ class AprilTagNode
   double tag_size; // tag side length of frame in meters 
   bool  show_debug_image;
 
+  geometry_msgs::Pose april_pose;
+
 public:
   AprilTagNode() : 
     it_(nh_), 
-    tag_codes(AprilTags::tagCodes36h11), 
+    //tag_codes(AprilTags::tagCodes36h11), 
+    tag_codes(AprilTags::tagCodes25h9), 
     tag_detector(NULL),
     camera_focal_length_y(700),
     camera_focal_length_x(700),
     tag_size(0.029), // 1 1/8in marker = 0.029m
-    show_debug_image(false)
+    show_debug_image(true)
   {
     // Subscrive to input video feed and publish output video feed
     image_sub_ = it_.subscribe("/camera/image_raw", 1, &AprilTagNode::imageCb, this);
     image_pub_ = it_.advertise("/april_tag_debug/output_video", 1);
     tag_list_pub = nh_.advertise<april_tag::AprilTagList>("/april_tags", 100);
+    april_pose_pub = nh_.advertise<geometry_msgs::Pose>("/april_pose",50);
 
     // Use a private node handle so that multiple instances of the node can
     // be run simultaneously while using different parameters.
@@ -129,6 +138,7 @@ public:
 
 
     april_tag::AprilTag tag_msg;
+    geometry_msgs::Pose april_pose;
 
     tag_msg.id = detection.id;
     tag_msg.hamming_distance = detection.hammingDistance;
@@ -139,6 +149,15 @@ public:
     tag_msg.yaw = yaw;
     tag_msg.pitch = pitch;
     tag_msg.roll = roll;
+
+    april_pose.position.x = tag_msg.x;
+    april_pose.position.y = tag_msg.y;
+    april_pose.position.z = tag_msg.z;
+    april_pose.orientation.x = tag_msg.yaw;
+    april_pose.orientation.y = tag_msg.pitch;
+    april_pose.orientation.z = tag_msg.roll;
+    april_pose_pub.publish(april_pose);
+
     return tag_msg;
   }
 
